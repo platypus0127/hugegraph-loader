@@ -19,36 +19,38 @@
 
 package com.baidu.hugegraph.loader.reader.file;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
 
 import com.baidu.hugegraph.loader.exception.ParseException;
-import com.baidu.hugegraph.loader.source.file.FileSource;
-import com.opencsv.CSVParser;
-import com.opencsv.CSVParserBuilder;
+import com.baidu.hugegraph.loader.reader.Line;
+import com.baidu.hugegraph.rest.SerializeException;
+import com.baidu.hugegraph.util.JsonUtil;
 
-public class CsvFileReader extends TextFileReader {
+public class JsonLineParser implements LineParser {
 
-    private static final String DELIMITER = ",";
-
-    private final CSVParser parser;
-
-    public CsvFileReader(FileSource fileSource) {
-        super(fileSource);
-        this.delimiter = DELIMITER;
-        char separator = this.delimiter.charAt(0);
-        this.parser = new CSVParserBuilder().withSeparator(separator)
-                                            .withIgnoreQuotations(false)
-                                            .build();
+    @Override
+    public void init(AbstractFileReader reader) {
+        // pass
     }
 
     @Override
-    protected List<String> split(String line) {
+    @SuppressWarnings("unchecked")
+    public Line parse(String line) {
         try {
-            return Arrays.asList(this.parser.parseLine(line));
-        } catch (IOException e) {
-            throw new ParseException(line, "Parse line '%s' error", e, line);
+            Map<String, Object> keyValues = JsonUtil.fromJson(line, Map.class);
+            Line result = new Line(line, keyValues.size());
+            for (Map.Entry<String, Object> entry : keyValues.entrySet()) {
+                result.add(entry.getKey(), entry.getValue());
+            }
+            return result;
+        } catch (SerializeException e) {
+            throw new ParseException(line, "Deserialize line '%s' error",
+                                     e, line);
         }
+    }
+
+    @Override
+    public void close() {
+        // pass
     }
 }

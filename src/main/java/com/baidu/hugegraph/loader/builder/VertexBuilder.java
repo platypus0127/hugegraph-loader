@@ -17,26 +17,25 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.parser;
+package com.baidu.hugegraph.loader.builder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.baidu.hugegraph.loader.reader.InputReader;
 import com.baidu.hugegraph.loader.source.VertexSource;
 import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.baidu.hugegraph.structure.graph.Vertex;
 import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.util.E;
 
-public class VertexParser extends ElementParser<Vertex> {
+public class VertexBuilder extends ElementBuilder<Vertex> {
 
     private final VertexSource source;
     private final VertexLabel vertexLabel;
 
-    public VertexParser(VertexSource source, InputReader reader) {
-        super(reader);
+    public VertexBuilder(VertexSource source) {
+        super(source);
         this.source = source;
         this.vertexLabel = this.getVertexLabel(source.label());
         // Ensure the id field is matched with id strategy
@@ -49,7 +48,7 @@ public class VertexParser extends ElementParser<Vertex> {
     }
 
     @Override
-    protected Vertex parse(Map<String, Object> keyValues) {
+    protected Vertex build(Map<String, Object> keyValues) {
         Vertex vertex = new Vertex(this.source.label());
         // Assign or check id if need
         this.assignIdIfNeed(vertex, keyValues);
@@ -84,7 +83,9 @@ public class VertexParser extends ElementParser<Vertex> {
             for (Map.Entry<String, Object> entry : keyValues.entrySet()) {
                 String fieldName = entry.getKey();
                 Object fieldValue = entry.getValue();
-
+                if (this.source().ignoredFields().contains(fieldName)) {
+                    continue;
+                }
                 String key = this.source.mappingField(fieldName);
                 Object value = this.validatePropertyValue(key, fieldValue);
 

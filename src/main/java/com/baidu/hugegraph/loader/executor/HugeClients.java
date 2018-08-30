@@ -20,20 +20,20 @@
 package com.baidu.hugegraph.loader.executor;
 
 import com.baidu.hugegraph.driver.HugeClient;
-import com.baidu.hugegraph.loader.executor.LoadOptions;
 
 public class HugeClients {
 
-    // TODO: seems no need to use ThreadLocal, reuse HugeClient is ok
-    private static final ThreadLocal<HugeClient> instance = new ThreadLocal<>();
+    private static volatile HugeClient instance = null;
 
     public static HugeClient get(LoadOptions options) {
-        HugeClient client = instance.get();
-        if (client == null) {
-            client = newHugeClient(options);
-            instance.set(client);
+        if (instance == null) {
+            synchronized (HugeClients.class) {
+                if (instance == null) {
+                    instance = newHugeClient(options);
+                }
+            }
         }
-        return client;
+        return instance;
     }
 
     private HugeClients() {}

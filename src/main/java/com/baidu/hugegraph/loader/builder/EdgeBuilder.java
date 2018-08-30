@@ -17,13 +17,12 @@
  * under the License.
  */
 
-package com.baidu.hugegraph.loader.parser;
+package com.baidu.hugegraph.loader.builder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.baidu.hugegraph.loader.reader.InputReader;
 import com.baidu.hugegraph.loader.source.EdgeSource;
 import com.baidu.hugegraph.structure.constant.IdStrategy;
 import com.baidu.hugegraph.structure.graph.Edge;
@@ -31,15 +30,15 @@ import com.baidu.hugegraph.structure.schema.EdgeLabel;
 import com.baidu.hugegraph.structure.schema.VertexLabel;
 import com.baidu.hugegraph.util.E;
 
-public class EdgeParser extends ElementParser<Edge> {
+public class EdgeBuilder extends ElementBuilder<Edge> {
 
     private final EdgeSource source;
     private final EdgeLabel edgeLabel;
     private final VertexLabel sourceLabel;
     private final VertexLabel targetLabel;
 
-    public EdgeParser(EdgeSource source, InputReader reader) {
-        super(reader);
+    public EdgeBuilder(EdgeSource source) {
+        super(source);
         this.source = source;
         this.edgeLabel = this.getEdgeLabel(source.label());
         this.sourceLabel = this.getVertexLabel(this.edgeLabel.sourceLabel());
@@ -55,7 +54,7 @@ public class EdgeParser extends ElementParser<Edge> {
     }
 
     @Override
-    protected Edge parse(Map<String, Object> keyValues) {
+    protected Edge build(Map<String, Object> keyValues) {
         Edge edge = new Edge(this.source.label());
         // Must add source/target vertex id
         edge.source(this.buildVertexId(this.sourceLabel,
@@ -83,6 +82,9 @@ public class EdgeParser extends ElementParser<Edge> {
         List<Object> primaryValues = new ArrayList<>(primaryKeys.size());
         for (String fieldName : fieldNames) {
             if (!keyValues.containsKey(fieldName)) {
+                continue;
+            }
+            if (this.source().ignoredFields().contains(fieldName)) {
                 continue;
             }
             Object fieldValue = keyValues.get(fieldName);

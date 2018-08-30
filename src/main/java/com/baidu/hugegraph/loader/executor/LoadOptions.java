@@ -21,16 +21,11 @@ package com.baidu.hugegraph.loader.executor;
 
 import java.io.File;
 
-import org.slf4j.Logger;
-
-import com.baidu.hugegraph.util.Log;
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
 public class LoadOptions {
-
-    private Logger LOG = Log.logger(LoadOptions.class);
 
     private static final LoadOptions instance = new LoadOptions();
 
@@ -85,7 +80,7 @@ public class LoadOptions {
 
     @Parameter(names = {"--max-parse-errors"}, arity = 1,
                validateWith = {PositiveValidator.class},
-               description = "The maximum number of rows that parse error " +
+               description = "The maximum number of rows that build error " +
                              "before exiting")
     public int maxParseErrors = 1;
 

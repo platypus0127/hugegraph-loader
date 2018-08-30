@@ -39,9 +39,10 @@ public class FileSource implements InputSource {
     private String delimiter;
     @JsonProperty("charset")
     private String charset = DEFAULT_CHARSET;
+    @JsonProperty("compression")
+    private Compression compression = Compression.NONE;
 
-    public FileSource() {
-    }
+    public FileSource() {}
 
     @Override
     public SourceType type() {
@@ -66,5 +67,9 @@ public class FileSource implements InputSource {
 
     public String charset() {
         return this.charset;
+    }
+
+    public Compression compression() {
+        return this.compression;
     }
 }
